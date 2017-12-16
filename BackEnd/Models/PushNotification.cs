@@ -74,7 +74,7 @@ namespace BackEnd.Models
             }
 
         }
-        public String NotifyUser(string latlong, string mobile_no, string Token, string myToken)
+        public String NotifyUser(string latlong, string mobile_no, string Token, string myToken,string Trip_id)
         {
             string str;
             try
@@ -97,7 +97,7 @@ namespace BackEnd.Models
                         body = latlong,
                         title = mobile_no,
                         color = myToken,
-                        sound = "Enabled",
+                        sound = Trip_id,
                         priority = "high"
 
                     }

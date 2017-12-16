@@ -29,7 +29,7 @@ namespace BackEnd.Controllers
             {
                 return Ok("Acc Already Takes Place");
             }
-           
+
             bool result = um.addUser(ud);
             return Ok(result);
         }
@@ -44,36 +44,48 @@ namespace BackEnd.Controllers
             }
             return false;
         }
+
+        [HttpGet]
+        public bool postStartRide(string trip_id, string Driver_id, string Customer_id, string StateUpdate, string Status_id)
+        {
+
+            bool result = um.addRoute(trip_id, Driver_id, Customer_id, StateUpdate, Status_id);
+            return result;
+        }
+        [HttpGet]
+        public bool cancelRide(string Trip_id, string cancelOption)
+        {
+            bool cancel = um.Cancel_Trip(Trip_id, cancelOption);
+            return cancel;
+        }
+
         [HttpPost]
-        public bool postnotifyUser(Object Json)
+        public string postnotifyUser(Object Json)
         {
             JavaScriptSerializer jss = new JavaScriptSerializer();
             RequestClass rc = jss.Deserialize<RequestClass>(Json.ToString());
-             string result = pn.NotifyUser(rc.latlong,rc.mobile_no, rc.token,rc.myToken);
-             if (result == "true")
-             {
-                 bool rest = um.addTrip(rc);
-                 if (rest == true)
-                 {
-                     return true;
-                 }
-                 else return false;
-             }
-             return false;
+            string rest = um.addTrip(rc);
+            if (rest != null && rest != "false")
+            {
+                string result = pn.NotifyUser(rc.latlong, rc.mobile_no, rc.token, rc.myToken, rest);
+                if (result == "false")
+                {
+                    um.deleteTrip(rest);
+                }
+                return rest;
+            }
+            else {
+                return "false";
+            }
+            return "false";
         }
+
+    
        /* [HttpGet]
         public bool id(string mobile)
         {
             bool result = um.id(mobile);
             return result;
         }*/
-
-        [HttpGet]
-        public bool postStartRide(string Driver_id,string Customer_id,string StateUpdate,string Status_id)
-        {
-
-            bool result = um.addRoute(Driver_id, Customer_id, StateUpdate, Status_id);
-            return result;
-        }
     }
 }
