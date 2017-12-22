@@ -111,15 +111,15 @@ namespace BackEnd.Models
                     sq_com.CommandType = CommandType.StoredProcedure;
                     sq_com.Parameters.AddWithValue("@token_no", rc.myToken);
                     sq_com.Parameters.AddWithValue("@user_token_no", rc.token);
-                    sq_com.Parameters.AddWithValue("@Source", rc.latlong);
-                    sq_com.Parameters.AddWithValue("@Destination", rc.latlong);
+                    sq_com.Parameters.AddWithValue("@Source", rc.lat+"-"+rc.longi);
+                    sq_com.Parameters.AddWithValue("@Destination", rc.lat + "-" + rc.longi);
                     sq_com.Parameters.AddWithValue("@Est_Duration", DateTime.Now);
                     sq_com.Parameters.AddWithValue("@Est_Fare", "400");
                     sq_com.Parameters.AddWithValue("@Final_Fare", "350");
                     sq_com.Parameters.AddWithValue("@Trip_status", "Ride To Patient");
                     sq_com.Parameters.Add("@Trip_id", SqlDbType.Int,32);
                 sq_com.Parameters["@Trip_id"].Direction = ParameterDirection.Output;
-                sq_com.Connection.Open();
+              
                 sq_com.ExecuteNonQuery();
                 string id = sq_com.Parameters["@Trip_id"].Value.ToString();
                 return id;
@@ -153,7 +153,7 @@ namespace BackEnd.Models
                 return false;
             }
         }
-        public bool Cancel_Trip(string trip_id, string CancelOption)
+        public bool Cancel_Trip(string trip_id, string CancelOption,string token)
         {
             string guilty = null;
             string penalty = "0";
@@ -172,12 +172,22 @@ namespace BackEnd.Models
                 penalty = "0";
                 guilty = "Driver";
             }
-            else if (CancelOption == "Driver is too late")
+            else if (CancelOption == "Accident Emergency")
             {
                 penalty = "0";
                 guilty = "Driver";
             }
 
+            else if (CancelOption == "Ambuance Broke Down")
+            {
+                penalty = "0";  
+                guilty = "Driver";
+            }
+            else if (CancelOption == "Heavy Traffic")
+            {
+                penalty = "0";
+                guilty = "Driver";
+            }
 
             try
             {

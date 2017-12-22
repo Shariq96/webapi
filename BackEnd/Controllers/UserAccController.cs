@@ -35,9 +35,9 @@ namespace BackEnd.Controllers
         }
         PushNotification pn = new PushNotification();
         [HttpGet]
-        public bool GetRequest(string mobile_no, string latlong, string token)
+        public bool GetRequest(string mobile_no, string lat,string longi, string token)
         {
-            string result = pn.SendNotificationFromFirebase(latlong, mobile_no, token);
+            string result = pn.SendNotificationFromFirebase(lat,longi, mobile_no, token);
             if (result == "true")
             {
                 return true;
@@ -53,9 +53,23 @@ namespace BackEnd.Controllers
             return result;
         }
         [HttpGet]
-        public bool cancelRide(string Trip_id, string cancelOption)
+        public bool NotifyandPostStart(string trip_id, string Driver_id, string Customer_id, string StateUpdate, string Status_id,string usertoken)
         {
-            bool cancel = um.Cancel_Trip(Trip_id, cancelOption);
+            bool result = um.addRoute(trip_id, Driver_id, Customer_id, StateUpdate, Status_id);
+            if (result == true)
+            {
+                pn.StartRideNot(usertoken);
+            }
+            return result;
+        }
+        [HttpGet]
+        public bool cancelRideUser(string Trip_id, string cancelOption,string token)
+        {
+            bool cancel = um.Cancel_Trip(Trip_id, cancelOption,token);
+            if (cancel == true)
+            {
+                pn.CancelRide(Trip_id, cancelOption, token);
+            }
             return cancel;
         }
 
@@ -67,7 +81,7 @@ namespace BackEnd.Controllers
             string rest = um.addTrip(rc);
             if (rest != null && rest != "false")
             {
-                string result = pn.NotifyUser(rc.latlong, rc.mobile_no, rc.token, rc.myToken, rest);
+                string result = pn.NotifyUser(rc.lat, rc.longi, rc.mobile_no, rc.token, rc.myToken, rest);
                 if (result == "false")
                 {
                     um.deleteTrip(rest);

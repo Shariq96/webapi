@@ -11,7 +11,7 @@ namespace BackEnd.Models
 {
     public class PushNotification
     { UserModel um = new UserModel();
-        public String SendNotificationFromFirebase(string latlong, string mobile_no, string Token)
+        public String SendNotificationFromFirebase(string lat,string longi, string mobile_no, string Token)
         {
             string customer_id = um.id(mobile_no);
             string str;
@@ -32,12 +32,12 @@ namespace BackEnd.Models
                     to = deviceId,
                     notification = new
                     {
-                        body = latlong,
+                        body = lat,
                         title = mobile_no,
                         color = Token,
                         sound = customer_id,
-                        priority = "high"
-
+                        priority = "high",
+                        tag = longi
                     },
                     token = Token,
                 };
@@ -74,7 +74,130 @@ namespace BackEnd.Models
             }
 
         }
-        public String NotifyUser(string latlong, string mobile_no, string Token, string myToken,string Trip_id)
+        public String StartRideNot(string cTOken)
+        {
+            string str;
+            try
+            {
+
+                string applicationID = "AAAACaK3asY:APA91bF353EERBZuZvA4t_2O3GFxA6JmcVg2hSpBTh6Yk_7dRth0AU-7Db59KFCgJzt4BiiW9-EEF96bliWxH8dMKLddnDUOeUX6dtoCBvWAiB6Y91_fGjlE8nkR9w-qPga55I3bJ2YP";
+
+                string senderId = "41384635078";
+
+                string deviceId = cTOken;
+
+                WebRequest tRequest = WebRequest.Create("https://fcm.googleapis.com/fcm/send");
+                tRequest.Method = "post";
+                tRequest.ContentType = "application/json";
+                var data = new
+                {
+                    to = deviceId,
+                    notification = new
+                    {
+                        body = "YOUR DRIVER IS ARRIVED",
+                        title = "EMERGNECY AMBULANCE",
+                       
+                        priority = "high"
+
+                    }
+
+                };
+                string jsonNotificationFormat = Newtonsoft.Json.JsonConvert.SerializeObject(data);
+
+                Byte[] byteArray = Encoding.UTF8.GetBytes(jsonNotificationFormat);
+                tRequest.Headers.Add(string.Format("Authorization: key={0}", applicationID));
+                tRequest.Headers.Add(string.Format("Sender: id={0}", senderId));
+                tRequest.ContentLength = byteArray.Length;
+                tRequest.ContentType = "application/json";
+                using (Stream dataStream = tRequest.GetRequestStream())
+                {
+                    dataStream.Write(byteArray, 0, byteArray.Length);
+                    using (WebResponse tResponse = tRequest.GetResponse())
+                    {
+                        using (Stream dataStreamResponse = tResponse.GetResponseStream())
+                        {
+                            using (StreamReader tReader = new StreamReader(dataStreamResponse))
+                            {
+                                String sResponseFromServer = tReader.ReadToEnd();
+                                str = sResponseFromServer;
+                                str = "true";
+                            }
+                        }
+                    }
+                }
+                return str;
+            }
+            catch (Exception ex)
+            {
+                str = "false";
+                return str;
+                //     return ex.Message;
+            }
+
+        }
+        public String CancelRide(string Trip_id,string reason,string dtoken)
+        {
+            string str;
+            try
+            {
+
+                string applicationID = "AAAACaK3asY:APA91bF353EERBZuZvA4t_2O3GFxA6JmcVg2hSpBTh6Yk_7dRth0AU-7Db59KFCgJzt4BiiW9-EEF96bliWxH8dMKLddnDUOeUX6dtoCBvWAiB6Y91_fGjlE8nkR9w-qPga55I3bJ2YP";
+
+                string senderId = "41384635078";
+
+                string deviceId = dtoken;
+
+                WebRequest tRequest = WebRequest.Create("https://fcm.googleapis.com/fcm/send");
+                tRequest.Method = "post";
+                tRequest.ContentType = "application/json";
+                var data = new
+                {
+                    to = deviceId,
+                    notification = new
+                    {
+                        body = "DUE TO "+reason,
+                        title = "RIDE HAS BEEN CANCELED",
+                        sound = Trip_id,
+                        priority = "high",
+                        click_action = true
+
+                    }
+
+                };
+                string jsonNotificationFormat = Newtonsoft.Json.JsonConvert.SerializeObject(data);
+
+                Byte[] byteArray = Encoding.UTF8.GetBytes(jsonNotificationFormat);
+                tRequest.Headers.Add(string.Format("Authorization: key={0}", applicationID));
+                tRequest.Headers.Add(string.Format("Sender: id={0}", senderId));
+                tRequest.ContentLength = byteArray.Length;
+                tRequest.ContentType = "application/json";
+                using (Stream dataStream = tRequest.GetRequestStream())
+                {
+                    dataStream.Write(byteArray, 0, byteArray.Length);
+                    using (WebResponse tResponse = tRequest.GetResponse())
+                    {
+                        using (Stream dataStreamResponse = tResponse.GetResponseStream())
+                        {
+                            using (StreamReader tReader = new StreamReader(dataStreamResponse))
+                            {
+                                String sResponseFromServer = tReader.ReadToEnd();
+                                str = sResponseFromServer;
+                                str = "true";
+                            }
+                        }
+                    }
+                }
+                return str;
+            }
+            catch (Exception ex)
+            {
+                str = "false";
+                return str;
+                //     return ex.Message;
+            }
+
+        }
+        public String NotifyUser(string lat,string longi, string mobile_no, string Token, string myToken,string Trip_id)
         {
             string str;
             try
@@ -94,7 +217,8 @@ namespace BackEnd.Models
                     to = deviceId,
                     notification = new
                     {
-                        body = latlong,
+                        body = lat,
+                        tag = longi,
                         title = mobile_no,
                         color = myToken,
                         sound = Trip_id,
